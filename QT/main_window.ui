@@ -13,7 +13,25 @@
   <property name="windowTitle">
    <string>FuturesWorshop</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QTableWidget" name="tablePosition"/>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -27,7 +45,7 @@
     <property name="title">
      <string>系统(&amp;S)</string>
     </property>
-    <addaction name="actionPereference"/>
+    <addaction name="actionPreference"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -43,7 +61,7 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionPereference">
+  <action name="actionPreference">
    <property name="text">
     <string>配置(&amp;P)</string>
    </property>
