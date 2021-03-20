@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# PyCharm
+.idea/
+
+# Application database
+*.sqlite
+# Application config
+config.json
+# Custom config
+custom.json
+# Temporary
+temp/
