@@ -32,8 +32,8 @@ def load_csv(csv_file: Path) -> List[Dict[str, Any]]:
     return result
 
 
-def save_csv(csv_file: Path, data: List[Dict[str, Any]], header: List[str]) -> None:
-    with open(csv_file, mode='w', encoding='utf-8') as f:
+def save_csv(csv_file: Path, header: List[str], data: List[Dict[str, Any]]) -> None:
+    with open(csv_file, mode='w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, header)
         writer.writeheader()
         for item in data:
@@ -50,11 +50,36 @@ def load_config() -> Dict[str, Any]:
     setting_product: Path = PACKAGE_PATH.joinpath('settings', 'product.csv')
     setting_stop: Path = PACKAGE_PATH.joinpath('settings', 'stop.csv')
 
-    result: Dict[str, Any] = {
-        'exchange': load_csv(setting_exchange),
-        'product': load_csv(setting_product),
-        'stop': load_csv(setting_stop)
-    }
+    result: Dict[str, Any] = {'exchange': []}
+
+    for item in load_csv(setting_exchange):
+        result['exchange'].append(item['symbol'])
+        result[item['symbol']] = {'name': item['name'], 'product': []}
+
+    for item in load_csv(setting_product):
+        result[item['exchange']]['product'].append(item['symbol'])
+        result[item['exchange']][item['symbol']] = {
+            'name': item['name'],
+            'fluctuation': item['fluctuation'],
+            'multiplier': item['multiplier']
+        }
+    for item in load_csv(setting_stop):
+        result[item['exchange']][item['symbol']]['long'] = item['long']
+        result[item['exchange']][item['symbol']]['short'] = item['short']
+    return result
+
+
+def get_custom_data() -> List[Dict[str, str]]:
+    global CONFIGS
+    result: List[Dict[str, str]] = []
+    temp: Dict[str, str] = {}
+    for exchange in CONFIGS['exchange']:
+        for product in CONFIGS[exchange]['product']:
+            temp['exchange'] = exchange
+            temp['symbol'] = product
+            temp['long'] = CONFIGS[exchange][product]['long']
+            temp['short'] = CONFIGS[exchange][product]['short']
+        result.append(copy.deepcopy(temp))
     return result
 
 
@@ -63,10 +88,16 @@ def save_config() -> None:
     Save the stop settings into the <stop.csv>.
     The csv file exists in <App path>/settings directory.
     """
-    global CONFIGS
     setting_stop: Path = PACKAGE_PATH.joinpath('settings', 'stop.csv')
-    header: List[str] = ['symbol', 'long', 'short']
-    save_csv(csv_file=setting_stop, data=CONFIGS['stop'], header=header)
+    header: List[str] = ['exchange', 'symbol', 'long', 'short']
+    data: List[Dict[str, str]] = get_custom_data()
+    save_csv(csv_file=setting_stop, header=header, data=data)
+
+
+def get_exchange_symbol_by_name(name: str) -> str:
+    for item in CONFIGS['exchange']:
+        if CONFIGS[item]['name'] == name:
+            return item
 
 
 # The config variable.
