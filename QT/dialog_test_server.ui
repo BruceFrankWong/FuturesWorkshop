@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DialogTestServer</class>
+ <widget class="QDialog" name="DialogTestServer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>558</width>
+    <height>409</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>FuturesWorkshop - 测试服务器</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="layoutHorizontalTop">
+     <item>
+      <widget class="QLabel" name="labelFile">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>未加载数据</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="spacerHorizontalTop">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonLoad">
+       <property name="text">
+        <string>加载(&amp;L)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="tablePrice">
+     <column>
+      <property name="text">
+       <string>日期/时间</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>最新价</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>最高价</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>最低价</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>买一价</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>买一量</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>卖一价</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>卖一量</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>成交量</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>成交额</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>持仓量</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="layoutHorizontalBottom">
+     <item>
+      <spacer name="SpacerhorizontalBottom">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonRun">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>开始(&amp;R)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonPause">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>暂停(&amp;P)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonStop">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>停止(&amp;S)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+ <slots>
+  <slot>on_buttonLoad_clicked()</slot>
+ </slots>
+</ui>
