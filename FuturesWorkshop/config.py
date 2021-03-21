@@ -5,9 +5,10 @@ __author__ = 'Bruce Frank Wong'
 from typing import Any, Dict, List
 import csv
 from pathlib import Path
+import copy
 
 
-# The path of the packages <InvestmentWorkshop>
+# The path of the packages <FuturesWorkshop>
 PACKAGE_PATH: Path = Path(__file__).parent
 
 
@@ -27,7 +28,7 @@ def load_csv(csv_file: Path) -> List[Dict[str, Any]]:
                         temp[k] = x
                     except ValueError:
                         temp[k] = v
-            result.append(temp)
+            result.append(copy.deepcopy(temp))
     return result
 
 
