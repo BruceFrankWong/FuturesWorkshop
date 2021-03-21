@@ -124,6 +124,7 @@ def test_load_config():
 def test_get_custom_data():
     result = get_custom_data()
     assert isinstance(result, list) is True
+    assert len(result) == 70
     for item in result:
         assert isinstance(item, dict) is True
         for key in item.keys():

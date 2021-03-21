@@ -69,28 +69,27 @@ def load_config() -> Dict[str, Any]:
     return result
 
 
-def get_custom_data() -> List[Dict[str, str]]:
-    global CONFIGS
+def get_custom_data(config: Dict[str, Any]) -> List[Dict[str, str]]:
     result: List[Dict[str, str]] = []
     temp: Dict[str, str] = {}
-    for exchange in CONFIGS['exchange']:
-        for product in CONFIGS[exchange]['product']:
+    for exchange in config['exchange']:
+        for product in config[exchange]['product']:
             temp['exchange'] = exchange
             temp['symbol'] = product
-            temp['long'] = CONFIGS[exchange][product]['long']
-            temp['short'] = CONFIGS[exchange][product]['short']
-        result.append(copy.deepcopy(temp))
+            temp['long'] = config[exchange][product]['long']
+            temp['short'] = config[exchange][product]['short']
+            result.append(copy.deepcopy(temp))
     return result
 
 
-def save_config() -> None:
+def save_config(config: Dict[str, Any]) -> None:
     """
     Save the stop settings into the <stop.csv>.
     The csv file exists in <App path>/settings directory.
     """
     setting_stop: Path = PACKAGE_PATH.joinpath('settings', 'stop.csv')
     header: List[str] = ['exchange', 'symbol', 'long', 'short']
-    data: List[Dict[str, str]] = get_custom_data()
+    data: List[Dict[str, str]] = get_custom_data(config)
     save_csv(csv_file=setting_stop, header=header, data=data)
 
 
