@@ -25,15 +25,9 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in range(len(column_width_of_table_position)):
             self._ui.tablePosition.setColumnWidth(i, column_width_of_table_position[i])
 
-        # hc: int = self._ui.tablePosition.horizontalHeader().count()
-        # print(hc)
-        # for i in range(hc):
-        # self._ui.tablePosition.resizeColumnsToContents()
         for i in range(self._ui.tablePosition.horizontalHeader().count()):
             print(i, self._ui.tablePosition.horizontalHeader().sectionSize(i))
 
-        # self._ui.actionTest.triggered.connect(self.show_dialog_test)
-        # self._ui.actionPreference.triggered.connect(self.show_dialog_preference)
         self._ui.actionQuit.triggered.connect(QtWidgets.qApp.quit)
 
     @pyqtSlot()
