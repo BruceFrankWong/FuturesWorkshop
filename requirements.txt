@@ -10,7 +10,7 @@ numpy==1.20.1
 pandas==1.2.3
 psutil==5.8.0
 PyJWT==2.0.1
-PyQt5==5.15.4
+PyQt5==5.15.2
 pyqt5-plugins==5.15.2.2.0.1
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.8.1
