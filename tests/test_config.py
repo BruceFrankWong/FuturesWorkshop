@@ -9,6 +9,7 @@ import os
 
 from FuturesWorkshop.config import (
     PACKAGE_PATH,
+    CONFIGS,
     load_csv,
     save_csv,
     load_config,
@@ -122,7 +123,7 @@ def test_load_config():
 
 
 def test_get_custom_data():
-    result = get_custom_data()
+    result = get_custom_data(CONFIGS)
     assert isinstance(result, list) is True
     assert len(result) == 70
     for item in result:
