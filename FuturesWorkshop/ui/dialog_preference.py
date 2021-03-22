@@ -32,19 +32,22 @@ class DialogPreference(QtWidgets.QDialog):
             widget_item = QtWidgets.QListWidgetItem(self.configs_backup[item]['name'])
             self._ui.listExchange.addItem(widget_item)
 
+        self._ui.tableProduct.cellChanged.connect(self.on_modified)
+
     @pyqtSlot(QtWidgets.QListWidgetItem, QtWidgets.QListWidgetItem)
     def on_listExchange_currentItemChanged(self,
                                            current: QtWidgets.QListWidgetItem,
                                            previous: QtWidgets.QListWidgetItem):
+        self._ui.tableProduct.cellChanged.disconnect(self.on_modified)
         exchange_symbol: str = get_exchange_symbol_by_name(current.text())
         row: int = 0
         self._ui.tableProduct.clearContents()
         self._ui.tableProduct.setRowCount(0)
         for i in range(len(self.column_width_of_table_position)):
             self._ui.tableProduct.setColumnWidth(i, self.column_width_of_table_position[i])
-        for product in CONFIGS[exchange_symbol]['product']:
+        for product in self.configs_backup[exchange_symbol]['product']:
             self._ui.tableProduct.insertRow(row)
-            item = QtWidgets.QTableWidgetItem(CONFIGS[exchange_symbol][product]['name'])
+            item = QtWidgets.QTableWidgetItem(self.configs_backup[exchange_symbol][product]['name'])
             item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
             item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
             self._ui.tableProduct.setItem(row, 0, item)
@@ -52,29 +55,30 @@ class DialogPreference(QtWidgets.QDialog):
             item.setTextAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
             item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
             self._ui.tableProduct.setItem(row, 1, item)
-            item = QtWidgets.QTableWidgetItem(str(CONFIGS[exchange_symbol][product]['fluctuation']))
+            item = QtWidgets.QTableWidgetItem(str(self.configs_backup[exchange_symbol][product]['fluctuation']))
             item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
             self._ui.tableProduct.setItem(row, 2, item)
-            item = QtWidgets.QTableWidgetItem(str(CONFIGS[exchange_symbol][product]['multiplier']))
+            item = QtWidgets.QTableWidgetItem(str(self.configs_backup[exchange_symbol][product]['multiplier']))
             item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
             self._ui.tableProduct.setItem(row, 3, item)
-            item = QtWidgets.QTableWidgetItem(str(CONFIGS[exchange_symbol][product]['long']))
+            item = QtWidgets.QTableWidgetItem(str(self.configs_backup[exchange_symbol][product]['long']))
             item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             self._ui.tableProduct.setItem(row, 4, item)
-            item = QtWidgets.QTableWidgetItem(str(CONFIGS[exchange_symbol][product]['short']))
+            item = QtWidgets.QTableWidgetItem(str(self.configs_backup[exchange_symbol][product]['short']))
             item.setTextAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             self._ui.tableProduct.setItem(row, 5, item)
             row += 1
+        self._ui.tableProduct.cellChanged.connect(self.on_modified)
 
-    @pyqtSlot(int, int)
-    def on_tableProduct_cellDoubleClicked(self, row, column):
-        print(f'row={row}, column={column}, value={self._ui.tableProduct.item(row, column).text()}')
-        # exchange_symbol: str = get_exchange_symbol_by_name(self._ui.listExchange.currentItem().text())
-        # product_symbol: str = self._ui.tableProduct.item(row, 1).text()
-        # k: str = 'long' if column == 4 else 'short'
-        # self.configs_backup[exchange_symbol][product_symbol][k] = self._ui.tableProduct.item(row, column).text()
+    def on_modified(self, row: int, column: int):
+        exchange_symbol: str = get_exchange_symbol_by_name(self._ui.listExchange.currentItem().text())
+        product_symbol: str = self._ui.tableProduct.item(row, 1).text()
+        long_or_short: str = 'long' if column == 4 else 'short'
+        self.configs_backup[exchange_symbol][product_symbol][long_or_short] = int(
+            self._ui.tableProduct.item(row, column).text()
+        )
 
     @pyqtSlot()
     def on_buttonBox_accepted(self):
