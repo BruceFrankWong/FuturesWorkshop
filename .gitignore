@@ -134,9 +134,7 @@ dmypy.json
 
 # Application database
 *.sqlite
-# Application settings
-config.json
-# Custom settings
-custom.json
+# Private settings
+user.json
 # Temporary
 temp/
