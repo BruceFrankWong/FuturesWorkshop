@@ -1,4 +1,4 @@
-exchange,symbol,long,short
+exchange,product,long,short
 SHFE,au,-3,3
 SHFE,ag,-3,3
 SHFE,cu,-3,3

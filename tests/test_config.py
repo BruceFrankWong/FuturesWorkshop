@@ -3,18 +3,65 @@
 __author__ = 'Bruce Frank Wong'
 
 
+"""
+Unit test from FuturesWorkshop.config module, with PyTest.
+
+The variable CONFIGS, or the return of load_config(), is an instance of dict.
+The following is its keys and values:
+{
+    'index': {
+        # The following coming from <exchange.csv>
+        'exchange': {
+            <exchange_symbol>: <exchange_name>,
+        },
+        # The following coming from <product.csv>
+        'product': {
+            <product_symbol>: <product_name>,
+        },
+        # The following coming from <stop_loss.csv>
+        'stop_loss': {
+            <product_symbol>: {,
+                'long': int,
+                'short': int,
+            },
+        },
+    },
+    'tq_account': { 
+        'account': str,
+        'password': str,
+    },
+    'trading_account': {
+        'broker': str,
+        'account': str,
+        'password': str,
+    },
+    <exchange_symbol>: {
+        # The following coming from <product.csv>
+        <product_symbol>: {
+            'fluctuation': float,
+            'multiplier': int,
+            'trading_section': int,
+            'optional_section': int,
+            'trading_time': [
+                <time>,
+            ],
+            'stop_loss_long': int,
+            'stop_loss_short': int,
+        },
+    },
+}
+"""
+
+
 from typing import Any, Dict, List
 from pathlib import Path
 import os
 
 from FuturesWorkshop.config import (
     PACKAGE_PATH,
-    CONFIGS,
     load_csv,
     save_csv,
-    load_config,
-    get_custom_data,
-    get_exchange_symbol_by_name
+    load_config
 )
 
 
@@ -27,7 +74,7 @@ def test_load_csv():
     file_list: List[Path] = [
         PACKAGE_PATH.joinpath('settings', 'exchange.csv'),
         PACKAGE_PATH.joinpath('settings', 'product.csv'),
-        PACKAGE_PATH.joinpath('settings', 'stop.csv'),
+        PACKAGE_PATH.joinpath('settings', 'stop_loss.csv'),
     ]
     for file in file_list:
         result = load_csv(file)
@@ -87,58 +134,39 @@ def test_load_config():
     configs: dict = load_config()
 
     # Level 1, exchanges.
-    assert 'exchange' in configs.keys()
-    assert len(configs.keys()) == len(configs['exchange']) + 1
-    for key_exchange, value_exchange in configs.items():
-        if key_exchange == 'exchange':
-            assert isinstance(value_exchange, list) is True
-        else:
-            assert key_exchange in configs['exchange']
-            assert isinstance(value_exchange, dict) is True
-
-            assert 'name' in configs[key_exchange].keys()
-            assert 'product' in configs[key_exchange].keys()
-
-            # Level 2, products.
-            assert len(configs[key_exchange].keys()) == len(configs[key_exchange]['product']) + 2
-            for key_product, value_product in configs[key_exchange].items():
-                if key_product == 'name':
-                    assert isinstance(value_product, str) is True
-                elif key_product == 'product':
-                    assert isinstance(value_product, list) is True
-                else:
-                    assert key_product in configs[key_exchange]['product']
-                    assert isinstance(value_product, dict) is True
-
-                    # Level 3, product details.
-                    for key_detail, value_detail in configs[key_exchange][key_product].items():
-                        assert isinstance(key_detail, str) is True
-                        assert key_detail in ['name', 'fluctuation', 'multiplier', 'long', 'short']
-                        if key_detail == 'name':
-                            assert isinstance(value_detail, str) is True
-                        elif key_detail == 'long' or key_detail == 'short':
-                            assert isinstance(value_detail, int) is True
-                        else:
-                            assert (isinstance(value_detail, int) or isinstance(value_detail, float)) is True
-
-
-def test_get_custom_data():
-    result = get_custom_data(CONFIGS)
-    assert isinstance(result, list) is True
-    assert len(result) == 70
-    for item in result:
-        assert isinstance(item, dict) is True
-        for key in item.keys():
-            assert isinstance(key, str) is True
-
-
-def test_get_exchange_symbol_by_name():
-    name_dict: Dict[str, str] = {
-        '上海期货交易所': 'SHFE',
-        '大连商品交易所': 'DCE',
-        '郑州商品交易所': 'CZCE',
-        '中国金融期货交易所': 'CFFEX',
-        '上海国际能源交易中心': 'INE'
-    }
-    for k, v in name_dict.items():
-        assert get_exchange_symbol_by_name(k) == v
+    key_level_1: List[str] = ['index', 'tq_account', 'trading_account']
+    key_level_1.extend([key for key in configs['index']['exchange'].keys()])
+    assert len(configs.keys()) == len(key_level_1)
+    for key in configs.keys():
+        assert key in key_level_1
+    # for key_exchange, value_exchange in configs.items():
+    #     if key_exchange == 'exchange':
+    #         assert isinstance(value_exchange, list) is True
+    #     else:
+    #         assert key_exchange in configs['exchange']
+    #         assert isinstance(value_exchange, dict) is True
+    #
+    #         assert 'name' in configs[key_exchange].keys()
+    #         assert 'product' in configs[key_exchange].keys()
+    #
+    #         # Level 2, products.
+    #         assert len(configs[key_exchange].keys()) == len(configs[key_exchange]['product']) + 2
+    #         for key_product, value_product in configs[key_exchange].items():
+    #             if key_product == 'name':
+    #                 assert isinstance(value_product, str) is True
+    #             elif key_product == 'product':
+    #                 assert isinstance(value_product, list) is True
+    #             else:
+    #                 assert key_product in configs[key_exchange]['product']
+    #                 assert isinstance(value_product, dict) is True
+    #
+    #                 # Level 3, product details.
+    #                 for key_detail, value_detail in configs[key_exchange][key_product].items():
+    #                     assert isinstance(key_detail, str) is True
+    #                     assert key_detail in ['name', 'fluctuation', 'multiplier', 'long', 'short']
+    #                     if key_detail == 'name':
+    #                         assert isinstance(value_detail, str) is True
+    #                     elif key_detail == 'long' or key_detail == 'short':
+    #                         assert isinstance(value_detail, int) is True
+    #                     else:
+    #                         assert (isinstance(value_detail, int) or isinstance(value_detail, float)) is True
