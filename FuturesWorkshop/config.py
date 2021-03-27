@@ -13,35 +13,63 @@ the value is controlled by users, as their wills.
 
 The CONFIGS variable is a dict instance:
 {
-    'index': {
-        # The following coming from <exchange.csv>
-        'exchange': {
-            <exchange_symbol>: <exchange_name>,
-        },
-        # The following coming from <product.csv>
-        'product': {
-            <product_symbol>: <product_name>,
-        },
-        # The following coming from <stop_loss.csv>
-        'stop_loss': {
-            <product_symbol>: {,
-                'long': int,
-                'short': int,
+    'exchange': {
+        'info': [
+            {
+                'symbol': <exchange_symbol>,
+                'name': <exchange_name>,
             },
-        },
-    },
-    <exchange_symbol>: {
-        # The following coming from <product.csv>
+            ...
+            {
+                'symbol': <exchange_symbol>,
+                'name': <exchange_name>,
+            },
+        ]
+        <exchange_symbol>: [
+            <product_symbol>,
+            ...
+            <product_symbol>,
+        ],
+    'product': {
+        'info': [
+            {
+                'symbol': <product_symbol>,
+                'name': <product_name>,
+            },
+            ...
+            {
+                'symbol': <product_symbol>,
+                'name': <product_name>,
+            },
+        ],
         <product_symbol>: {
             'fluctuation': float,
             'multiplier': int,
             'trading_section': int,
             'optional_section': int,
             'trading_time': [
-                <time>,
+                {
+                    'open': <datetime.time>,
+                    'close': <datetime.time>,
+                },
+                ...
+                {
+                    'open': <datetime.time>,
+                    'close': <datetime.time>,
+                },
             ],
-            'stop_loss_long': int,
-            'stop_loss_short': int,
+        },
+        ...
+    },
+    'stop_loss': {
+        <product_symbol>: {,
+            'long': int,
+            'short': int,
+        },
+        ...
+        <product_symbol>: {,
+            'long': int,
+            'short': int,
         },
     },
     'tq_account': { 
@@ -114,6 +142,20 @@ def get_config_file_path(config_type: str) -> Path:
     return config_file_path[config_type]
 
 
+def _handle_trading_time(raw_trading_time: str) -> List[Dict[str, str]]:
+    result: List[Dict[str, str]] = []
+    trading_time_list: List[str] = [t for t in raw_trading_time.split(';')]
+    for i in range(0, len(trading_time_list), 2):
+        result.append(
+            {
+                'open': trading_time_list[i],
+                'close': trading_time_list[i+1],
+            }
+        )
+    print(result)
+    return result
+
+
 def load_config() -> Dict[str, Any]:
     """
     Load the config files, including:
@@ -125,11 +167,13 @@ def load_config() -> Dict[str, Any]:
     :return: a dict which key is str and value is list.
     """
     result: Dict[str, Any] = {
-        'index': {
-            'exchange': {},
-            'product': {},
-            'stop_loss': {},
+        'exchange': {
+            'info': [],
         },
+        'product': {
+            'info': [],
+        },
+        'stop_loss': {},
         'tq_account': {
             'account': '',
             'password': '',
@@ -142,34 +186,48 @@ def load_config() -> Dict[str, Any]:
     }
 
     # exchange.csv
-    for item in load_csv(get_config_file_path('exchange')):
-        result['index']['exchange'][item['symbol']] = item['name']
-        result[item['symbol']] = {}
+    result['exchange']['info'] = load_csv(get_config_file_path('exchange'))
+    for item in result['exchange']['info']:
+        result['exchange'][item['symbol']] = []
 
     # product.csv
     for item in load_csv(get_config_file_path('product')):
-        result['index']['product'][item['symbol']] = item['name']
-        result[item['exchange']][item['symbol']] = {
+        result['product']['info'].append(
+            {
+                'exchange': item['exchange'],
+                'symbol': item['symbol'],
+                'name': item['name'],
+            }
+        )
+        result['exchange'][item['exchange']].append(item['symbol'])
+        result['product'][item['symbol']] = {
             'fluctuation': item['fluctuation'],
             'multiplier': item['multiplier'],
             'trading_section': item['trading_section'],
             'optional_section': item['optional_section'],
-            'trading_time': [
-                time(
-                    hour=int(t.split(':')[0]),
-                    minute=int(t.split(':')[1])
-                ) for t in item['trading_time'].split(';')
-            ],
+            'trading_time': [],
         }
+        trading_time_list: List[str] = [t for t in item['trading_time'].split(';')]
+        for i in range(0, len(trading_time_list), 2):
+            result['product'][item['symbol']]['trading_time'].append(
+                {
+                    'open': time(
+                        hour=int(trading_time_list[i].split(':')[0]),
+                        minute=int(trading_time_list[i].split(':')[1])
+                    ),
+                    'close': time(
+                        hour=int(trading_time_list[i+1].split(':')[0]),
+                        minute=int(trading_time_list[i+1].split(':')[1])
+                    ),
+                }
+            )
 
     # stop_loss.csv
     for item in load_csv(get_config_file_path('stop_loss')):
-        result['index']['stop_loss'][item['product']] = {
+        result['stop_loss'][item['product']] = {
             'long': item['long'],
             'short': item['short'],
         }
-        result[item['exchange']][item['product']]['long'] = item['long']
-        result[item['exchange']][item['product']]['short'] = item['short']
 
     # user.json
     result.update(load_json(get_config_file_path('user')))
