@@ -13,6 +13,8 @@ from FuturesWorkshop.utility import (
     get_product_symbol_list,
     get_product_name_list,
     get_product_symbol_by_name,
+    get_product_symbol_list_by_exchange,
+    get_product_trading_time,
     get_stop_loss_settings,
 )
 
@@ -83,7 +85,7 @@ def test_get_product_name_list():
         '苯乙烯', '液化石油气', '焦炭', '焦煤', '铁矿石', '强麦', '普麦', '早籼稻', '粳稻', '晚籼稻',
         '菜籽油', '油菜籽', '菜籽粕', '棉花', '棉纱', '白糖', '苹果', '红枣', '花生', '动力煤', '硅铁', '锰硅',
         'PTA', '甲醇', '尿素', '纯碱', '玻璃', '短纤', '原油', '低硫燃料油', '20号胶', '国际铜',
-         '中证500股指期货', '沪深300股指期货', '上证50股指期货', '10年期国债期货', '5年期国债期货', '2年期国债期货',
+        '中证500股指期货', '沪深300股指期货', '上证50股指期货', '10年期国债期货', '5年期国债期货', '2年期国债期货',
     ]
     result = get_product_name_list()
     assert isinstance(result, list)
@@ -169,10 +171,109 @@ def test_get_product_symbol_by_name():
         assert get_product_symbol_by_name(v) == k
 
 
+def test_get_product_symbol_list_by_exchange():
+    exchange_product_mapper: Dict[str, List[str]] = {
+        'SHFE': [
+            'au',
+            'ag',
+            'cu',
+            'al',
+            'zn',
+            'pb',
+            'ni',
+            'sn',
+            'rb',
+            'wr',
+            'hc',
+            'ss',
+            'fu',
+            'bu',
+            'ru',
+            'sp'
+        ],
+        'DCE': [
+            'c',
+            'cs',
+            'a',
+            'b',
+            'm',
+            'y',
+            'p',
+            'fb',
+            'bb',
+            'jd',
+            'rr',
+            'lh',
+            'l',
+            'v',
+            'pp',
+            'eg',
+            'eb',
+            'pg',
+            'j',
+            'jm',
+            'i'
+        ],
+        'CZCE': [
+            'WH',
+            'PM',
+            'RI',
+            'JR',
+            'LR',
+            'OI',
+            'RS',
+            'RM',
+            'CF',
+            'CY',
+            'SR',
+            'AP',
+            'CJ',
+            'PK',
+            'ZC',
+            'SF',
+            'SM',
+            'TA',
+            'MA',
+            'UR',
+            'SA',
+            'FG',
+            'PF'
+        ],
+        'INE': [
+            'sc',
+            'lu',
+            'nr',
+            'bc'
+        ],
+        'CFFEX': [
+            'IC',
+            'IF',
+            'IH',
+            'T',
+            'TF',
+            'TS'
+        ],
+    }
+    exchange_symbol_list: List[str] = [
+        'SHFE', 'DCE', 'CZCE', 'CFFEX', 'INE',
+    ]
+    for exchange_symbol in exchange_symbol_list:
+        assert get_product_symbol_list_by_exchange(exchange_symbol) == exchange_product_mapper[exchange_symbol]
+
+
+def test_get_product_trading_time():
+    result = get_product_trading_time('c')
+    assert len(result) == 4
+    result = get_product_trading_time('bb')
+    assert len(result) == 3
+    result = get_product_trading_time('IC')
+    assert len(result) == 2
+
+
 def test_get_stop_loss_settings():
     result = get_stop_loss_settings()
     assert isinstance(result, dict) is True
-    assert len(result) == len(CONFIGS['index']['product'])
+    assert len(result) == len(CONFIGS['product']['info'])
     for product_symbol, setting in result.items():
         assert isinstance(setting, dict) is True
         for k, v in setting.items():
