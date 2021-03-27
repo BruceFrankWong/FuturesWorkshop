@@ -89,7 +89,7 @@ from typing import Any, Dict, List
 from pathlib import Path
 import csv
 import json
-from datetime import time
+from datetime import datetime, date, time, timedelta
 import copy
 
 
@@ -104,15 +104,20 @@ def load_csv(csv_file: Path) -> List[Dict[str, Any]]:
         reader = csv.DictReader(f)
         for row in reader:
             for k, v in row.items():
-                if '.' in v:
-                    x = float(v)
-                    temp[k] = x
-                else:
-                    try:
+                try:
+                    if '-' in v and ':' in v:
+                        x = datetime.fromisoformat(v)
+                    elif '-' in v and v[0] != '-':
+                        x = date.fromisoformat(v)
+                    elif ':' in v:
+                        x = time.fromisoformat(v)
+                    elif '.' in v:
+                        x = float(v)
+                    else:
                         x = int(v)
-                        temp[k] = x
-                    except ValueError:
-                        temp[k] = v
+                    temp[k] = x
+                except ValueError:
+                    temp[k] = v
             result.append(copy.deepcopy(temp))
     return result
 
@@ -134,26 +139,13 @@ def load_json(json_file: Path) -> Dict[str, Any]:
 
 def get_config_file_path(config_type: str) -> Path:
     config_file_path: Dict[str, Path] = {
-        'exchange': PACKAGE_PATH.joinpath('settings', 'exchange.csv'),
-        'product': PACKAGE_PATH.joinpath('settings', 'product.csv'),
+        'exchange': PACKAGE_PATH.joinpath('data', 'basic', 'exchange.csv'),
+        'product': PACKAGE_PATH.joinpath('data', 'basic', 'product.csv'),
+        'holiday': PACKAGE_PATH.joinpath('data', 'basic', 'holiday.csv'),
         'stop_loss': PACKAGE_PATH.joinpath('settings', 'stop_loss.csv'),
         'user': PACKAGE_PATH.joinpath('settings', 'user.json')
     }
     return config_file_path[config_type]
-
-
-def _handle_trading_time(raw_trading_time: str) -> List[Dict[str, str]]:
-    result: List[Dict[str, str]] = []
-    trading_time_list: List[str] = [t for t in raw_trading_time.split(';')]
-    for i in range(0, len(trading_time_list), 2):
-        result.append(
-            {
-                'open': trading_time_list[i],
-                'close': trading_time_list[i+1],
-            }
-        )
-    print(result)
-    return result
 
 
 def load_config() -> Dict[str, Any]:
@@ -169,6 +161,10 @@ def load_config() -> Dict[str, Any]:
     result: Dict[str, Any] = {
         'exchange': {
             'info': [],
+        },
+        'holiday': {
+            'raw': [],
+            'expanded': [],
         },
         'product': {
             'info': [],
@@ -189,6 +185,13 @@ def load_config() -> Dict[str, Any]:
     result['exchange']['info'] = load_csv(get_config_file_path('exchange'))
     for item in result['exchange']['info']:
         result['exchange'][item['symbol']] = []
+
+    # holiday.csv
+    result['holiday']['raw'] = load_csv(get_config_file_path('holiday'))
+    for item in result['holiday']['raw']:
+        for i in range((item['end'] - item['begin']).days + 1):
+            day = item['begin'] + timedelta(days=i)
+            result['holiday']['expanded'].append(day)
 
     # product.csv
     for item in load_csv(get_config_file_path('product')):

@@ -14,7 +14,7 @@ See <config.py> for more details.
 from typing import Any, Dict, List
 from pathlib import Path
 import os
-from datetime import time
+from datetime import datetime, date, time
 
 from FuturesWorkshop.config import (
     PACKAGE_PATH,
@@ -32,8 +32,9 @@ def test_package_path():
 
 def test_load_csv():
     file_list: List[Path] = [
-        PACKAGE_PATH.joinpath('settings', 'exchange.csv'),
-        PACKAGE_PATH.joinpath('settings', 'product.csv'),
+        PACKAGE_PATH.joinpath('data', 'basic', 'exchange.csv'),
+        PACKAGE_PATH.joinpath('data', 'basic', 'product.csv'),
+        PACKAGE_PATH.joinpath('data', 'basic', 'holiday.csv'),
         PACKAGE_PATH.joinpath('settings', 'stop_loss.csv'),
     ]
     for file in file_list:
@@ -43,7 +44,14 @@ def test_load_csv():
             assert isinstance(item, dict) is True
             for k, v in item.items():
                 assert isinstance(k, str) is True
-                assert (isinstance(v, str) or isinstance(v, int) or isinstance(v, float)) is True
+                assert (
+                    isinstance(v, str) or
+                    isinstance(v, int) or
+                    isinstance(v, float) or
+                    isinstance(v, datetime) or
+                    isinstance(v, date) or
+                    isinstance(v, time)
+                ) is True
 
 
 def test_save_csv():
@@ -94,7 +102,7 @@ def test_load_config():
     configs: dict = load_config()
 
     # Level 1.
-    key_level_1: List[str] = ['exchange', 'product', 'stop_loss', 'tq_account', 'trading_account']
+    key_level_1: List[str] = ['exchange', 'holiday', 'product', 'stop_loss', 'tq_account', 'trading_account']
     assert len(configs.keys()) == len(key_level_1)
     for key in configs.keys():
         assert key in key_level_1
@@ -112,6 +120,9 @@ def test_load_config():
             assert k in exchange_symbol_list
             for item in v:
                 assert isinstance(item, str)
+
+    # CONFIGS['holiday]
+    assert isinstance(configs['holiday'], dict) is True
 
     # CONFIGS['product']
     assert isinstance(configs['product'], dict) is True
