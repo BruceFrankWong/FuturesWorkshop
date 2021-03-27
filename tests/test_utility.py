@@ -4,6 +4,7 @@ __author__ = 'Bruce Frank Wong'
 
 
 from typing import Dict, List
+from datetime import date
 
 from FuturesWorkshop.config import CONFIGS
 from FuturesWorkshop.utility import (
@@ -16,6 +17,7 @@ from FuturesWorkshop.utility import (
     get_product_symbol_list_by_exchange,
     get_product_trading_time,
     get_stop_loss_settings,
+    get_main_contract
 )
 
 
@@ -279,3 +281,12 @@ def test_get_stop_loss_settings():
         for k, v in setting.items():
             assert isinstance(k, str) is True
             assert isinstance(v, int) is True
+
+
+def test_get_main_contract():
+    day: date = date.fromisoformat('2019-07-15')
+    assert get_main_contract(day, 'ag') == '1912'
+    day = date.fromisoformat('2015-11-03')
+    assert get_main_contract(day, 'ag') == '1512'
+    day = date.fromisoformat('2020-11-12')
+    assert get_main_contract(day, 'rb') == '2101'
