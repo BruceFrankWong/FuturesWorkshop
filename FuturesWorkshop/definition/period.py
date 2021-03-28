@@ -94,3 +94,12 @@ class PeriodEnum(Enum):
     Minute_15 = Period(15, PeriodUnitEnum.Minute)
     Hour = Period(1, PeriodUnitEnum.Hour)
     Day = Period(1, PeriodUnitEnum.Day)
+
+    def to_second(self) -> int:
+        return self.value.to_second()
+
+    def to_english(self) -> str:
+        return self.value.to_english()
+
+    def to_chinese(self) -> str:
+        return self.value.to_chinese()
