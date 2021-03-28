@@ -3,7 +3,7 @@
 __author__ = 'Bruce Frank Wong'
 
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from datetime import date
 
 from FuturesWorkshop.config import CONFIGS
@@ -17,7 +17,8 @@ from FuturesWorkshop.utility import (
     get_product_symbol_list_by_exchange,
     get_product_trading_time,
     get_stop_loss_settings,
-    get_main_contract
+    get_main_contract,
+    split_symbol
 )
 
 
@@ -290,3 +291,13 @@ def test_get_main_contract():
     assert get_main_contract(day, 'ag') == '1512'
     day = date.fromisoformat('2020-11-12')
     assert get_main_contract(day, 'rb') == '2101'
+
+
+def test_split_symbol():
+    io_dict: Dict[str, Tuple[str, str, str]] = {
+        'DCE.c2101': ('DCE', 'c', '2101'),
+        'CZCE.ZC2001': ('CZCE', 'ZC', '2001'),
+        'SHFE.ag2101': ('SHFE', 'ag', '2101')
+    }
+    for k, v in io_dict.items():
+        assert split_symbol(k) == v

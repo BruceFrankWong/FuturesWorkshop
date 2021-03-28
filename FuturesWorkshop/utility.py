@@ -8,7 +8,7 @@ FuturesWorkshop - Utility module
 """
 
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from datetime import date, time
 from pathlib import Path
 import csv
@@ -95,3 +95,18 @@ def get_main_contract(day: date, product_symbol: str = None) -> str:
 
 def get_stop_loss_settings() -> Dict[str, Dict[str, int]]:
     return CONFIGS['stop_loss']
+
+
+def split_symbol(symbol: str) -> Tuple[str, str, str]:
+    exchange_symbol: str
+    product_symbol: str
+    delivery: str
+    temp: str
+    exchange_symbol, temp = symbol.split('.')
+    if temp[1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        product_symbol = temp[0]
+        delivery = temp[1:]
+    else:
+        product_symbol = temp[:2]
+        delivery = temp[2:]
+    return exchange_symbol, product_symbol, delivery
