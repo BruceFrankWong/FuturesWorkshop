@@ -50,6 +50,12 @@ def get_product_name_list() -> List[str]:
     return [product['name'] for product in CONFIGS['product']['info']]
 
 
+def get_product_name_by_symbol(product_symbol: str) -> str:
+    for item in CONFIGS['product']['info']:
+        if item['symbol'] == product_symbol:
+            return item['name']
+
+
 def get_product_symbol_by_name(product_name: str) -> str:
     for item in CONFIGS['product']['info']:
         if item['name'] == product_name:

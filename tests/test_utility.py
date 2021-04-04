@@ -5,9 +5,11 @@ __author__ = 'Bruce Frank Wong'
 
 from typing import Dict, List, Tuple
 from datetime import date
+import csv
 
-from FuturesWorkshop.config import CONFIGS
+from FuturesWorkshop.config import CONFIGS, PACKAGE_PATH
 from FuturesWorkshop.utility import (
+    is_holiday,
     get_exchange_symbol_list,
     get_exchange_name_list,
     get_exchange_symbol_by_name,
@@ -301,3 +303,18 @@ def test_split_symbol():
     }
     for k, v in io_dict.items():
         assert split_symbol(k) == v
+
+
+def test_holiday_csv():
+    """
+    Test <holiday.csv>. Make sure the end date of holiday is large than the begin date.
+    :return:
+    """
+    begin: date
+    end: date
+    with open(PACKAGE_PATH.joinpath('data', 'basic', 'holiday.csv'), mode='r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            begin = date.fromisoformat(row['begin'])
+            end = date.fromisoformat(row['end'])
+            assert end >= begin
