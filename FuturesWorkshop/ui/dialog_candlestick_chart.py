@@ -36,33 +36,40 @@ from ..config import PACKAGE_PATH
 
 
 class CandlestickItem(pg.GraphicsObject):
-    def __init__(self, data: pd.DataFrame):
+    df: pd.DataFrame
+    y_min: float
+    y_max: float
+
+    def __init__(self):
         super().__init__()
-        self.data: pd.DataFrame = data
-        print(self.data)
-        print(self.data.info())
         self.picture = QPicture()
+
+    def set_data(self, df: pd.DataFrame):
+        self.df = df
+        self.y_min = self.df['low'].min()
+        self.y_max = self.df['high'].max()
+        print(f'<CandlestickItem> received {self.df.shape[0]} rows, value min = {self.y_min}, max = {self.y_max}')
         self.generate()
 
     def generate(self):
         painter = QPainter(self.picture)
         painter.setPen(pg.mkPen('w'))
         w = 1.0 / 3.0
-        for i in range(self.data.shape[0]):
-            if self.data.at[i, 'close'] > self.data.at[i, 'open']:
+        for i in range(self.df.shape[0]):
+            if self.df.at[i, 'close'] > self.df.at[i, 'open']:
                 painter.setPen(pg.mkPen('g'))
                 painter.setBrush(pg.mkBrush('g'))
-            elif self.data.at[i, 'close'] < self.data.at[i, 'open']:
+            elif self.df.at[i, 'close'] < self.df.at[i, 'open']:
                 painter.setPen(pg.mkPen('r'))
                 painter.setBrush(pg.mkBrush('r'))
             else:
                 painter.setPen(pg.mkPen('w'))
                 painter.setBrush(pg.mkBrush('w'))
             painter.drawLine(
-                QPointF(i, self.data.at[i, 'low']), QPointF(i, self.data.at[i, 'high'])
+                QPointF(i, self.df.at[i, 'low']), QPointF(i, self.df.at[i, 'high'])
             )
             painter.drawRect(
-                QRectF(i - w, self.data.at[i, 'open'], w * 2, self.data.at[i, 'close'] - self.data.at[i, 'open'])
+                QRectF(i - w, self.df.at[i, 'open'], w * 2, self.df.at[i, 'close'] - self.df.at[i, 'open'])
             )
         painter.end()
 
@@ -73,7 +80,7 @@ class CandlestickItem(pg.GraphicsObject):
         return QRectF(self.picture.boundingRect())
 
 
-class BarGraph(pg.BarGraphItem):
+class BarGraphItem(pg.BarGraphItem):
     def __init__(self, df: pd.DataFrame):
         super().__init__()
         self.df = df
@@ -83,13 +90,16 @@ class BarGraph(pg.BarGraphItem):
 
 
 class DialogCandlestickChart(QDialog):
-    candlestick_item: CandlestickItem
+    df: pd.DataFrame
+
+    volume_item: BarGraphItem
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._ui = Ui_DialogCandlestickChart()
         self._ui.setupUi(self)
 
+        self.candlestick_item: CandlestickItem = CandlestickItem()
         self._init_chart()
 
         self._ui.buttonDraw.setEnabled(False)
@@ -101,6 +111,7 @@ class DialogCandlestickChart(QDialog):
         self.space_max = 4
         self.width_min = 3
         self.space_min = 1
+        self.stick_width = 13
 
         # self._init_chart()
 
@@ -108,7 +119,7 @@ class DialogCandlestickChart(QDialog):
         # self._ui.chartCandlestick.paintEvent.connect(self._ui.chartCandlestick.on_paintEvent)
 
         self._ui.buttonLoad.clicked.connect(self.load_data)
-        self._ui.buttonDraw.clicked.connect(self._draw)
+        self._ui.buttonDraw.clicked.connect(self.draw)
 
     def _init_chart(self):
         # WidgetCanvas and its layout.
@@ -180,7 +191,7 @@ class DialogCandlestickChart(QDialog):
         self.chart_macd = pg.PlotWidget(
             parent=self._ui.splitter_attached,
             name='ChartMACD',
-            title='<span style="font-size: 10pt" justify="left">MACD'
+            title='<span style="font-size: 10pt" align="left">MACD'
         )
 
         # Add attached charts into splitter_attached.
@@ -191,11 +202,20 @@ class DialogCandlestickChart(QDialog):
     def load_data(self):
         self.setCursor(Qt.WaitCursor)
         self._ui.buttonLoad.setEnabled(False)
-        self.candlestick_item = CandlestickItem(pd.read_csv(PACKAGE_PATH.parent.joinpath('temp', 'test.csv')))
+        csv_file = PACKAGE_PATH.parent.joinpath('temp', 'test.csv')
+        # csv_file = PACKAGE_PATH.parent.joinpath('temp', 'SHFE.ag2102_Minute.csv')
+        self.df = pd.read_csv(csv_file)
         self.setCursor(Qt.ArrowCursor)
         self._ui.buttonDraw.setEnabled(True)
 
-    def _draw(self):
+    def draw(self):
+        l: int = len(self.df)
+        count: int = int(self.width() / self.stick_width)
+        df_ohlc: pd.DataFrame = self.df.loc[l-count-1:l-1, ['open', 'high', 'low', 'close']]
+        print(df_ohlc)
+        df_ohlc.reset_index(inplace=True, drop=True)
+        print(df_ohlc)
+        self.candlestick_item.set_data(df_ohlc)
         self.chart_main.addItem(self.candlestick_item)
 
     # def draw(self):
